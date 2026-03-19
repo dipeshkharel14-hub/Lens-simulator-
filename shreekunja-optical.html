@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shreekunja Optical – Smart Lens Selection Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --em: #2ecc71; --em2: #27ae60; --emg: rgba(46,204,113,0.18);
+  --gold: #c9a84c; --goldl: #e8c97a;
+  --bg: #0d0f13; --card: #181c26; --border: rgba(201,168,76,0.22);
+  --t1: #f0f0f0; --t2: #9aa0b0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t1);font-family:'Jost',sans-serif;font-weight:300;overflow-x:hidden;}
+
+/* HEADER */
+.hdr{background:linear-gradient(180deg,#080a0e,#0d0f13);border-bottom:1px solid var(--border);padding:0 24px;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 120% at 50% 0%,rgba(46,204,113,0.07),transparent 70%);}
+.hdr-in{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;align-items:center;padding:34px 0 26px;gap:5px;position:relative;}
+.eyebrow{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--em);font-weight:500;}
+.logo-row{display:flex;align-items:center;gap:16px;}
+.logo-ico{width:52px;height:52px;flex-shrink:0;}
+.logo-ico svg{width:100%;height:100%;filter:drop-shadow(0 0 10px rgba(46,204,113,0.5));}
+.brand{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(30px,5vw,54px);letter-spacing:4px;text-transform:uppercase;background:linear-gradient(135deg,#f0ebe0 10%,var(--goldl) 40%,#f0ebe0 60%,var(--gold) 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.tagline{font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--t2);font-weight:200;}
+.hdr-rule{width:260px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-top:6px;}
+
+/* SIM HEADER */
+.sim-hdr{text-align:center;padding:28px 24px 16px;}
+.sim-hdr h2{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,3vw,30px);font-weight:400;font-style:italic;}
+.sim-hdr h2 span{color:var(--em);font-style:normal;font-weight:600;}
+.sim-hdr p{margin-top:6px;font-size:12px;color:var(--t2);letter-spacing:1px;}
+
+/* LAYOUT */
+.wrap{max-width:1400px;margin:0 auto;padding:0 20px 40px;display:grid;grid-template-columns:1fr 310px;gap:22px;align-items:start;}
+
+/* COMPARISON */
+.comp-outer{border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 24px 80px rgba(0,0,0,0.7);background:#000;}
+.comp-box{position:relative;aspect-ratio:16/9;min-height:340px;user-select:none;cursor:ew-resize;overflow:hidden;}
+#cvPremium,#cvStandard{position:absolute;inset:0;width:100%;height:100%;}
+#cvPremium{z-index:1;}
+#cvStandard{z-index:2;}
+.plbl{position:absolute;top:14px;z-index:8;padding:5px 12px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;backdrop-filter:blur(8px);}
+.plbl-l{left:14px;background:rgba(220,60,60,0.25);border:1px solid rgba(220,60,60,0.5);color:#ff8080;}
+.plbl-r{right:14px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.45);color:var(--em);}
+.slider-line{position:absolute;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);z-index:10;transform:translateX(-50%);pointer-events:none;}
+.slider-btn{position:absolute;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1a1e28,#2a2e3e);border:2px solid var(--gold);box-shadow:0 4px 20px rgba(0,0,0,0.8),0 0 14px rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);letter-spacing:1px;z-index:11;pointer-events:none;}
+.comp-meta{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-top:none;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);}
+.comp-meta span{color:var(--em);font-weight:600;}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:14px;}
+@media(min-width:901px){
+  .sidebar{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,0.3) transparent;padding-right:3px;}
+  .sidebar::-webkit-scrollbar{width:3px;}
+  .sidebar::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--em));border-radius:2px;}
+}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--em),var(--gold));border-radius:12px 12px 0 0;}
+.ctitle{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+
+/* MODE TABS */
+.mtabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.mtab{padding:7px 5px;border-radius:7px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--t2);font-size:10px;font-family:'Jost',sans-serif;font-weight:500;letter-spacing:1px;cursor:pointer;transition:all .25s;text-align:center;}
+.mtab:hover{border-color:var(--em2);color:var(--t1);}
+.mtab.on{background:var(--emg);border-color:var(--em);color:var(--em);animation:pglow 3s ease-in-out infinite;}
+@keyframes pglow{0%,100%{box-shadow:0 0 10px rgba(46,204,113,0.1);}50%{box-shadow:0 0 22px rgba(46,204,113,0.3);}}
+
+/* TOGGLE PAIR */
+.tpair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.ltog{padding:11px 7px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,0.02);cursor:pointer;transition:all .3s;text-align:center;}
+.ltog:hover{border-color:rgba(255,255,255,0.15);}
+.ltog.on{background:linear-gradient(135deg,rgba(46,204,113,0.12),rgba(46,204,113,0.05));border-color:var(--em);box-shadow:0 0 18px rgba(46,204,113,0.1);}
+.ltog.bad.on{background:linear-gradient(135deg,rgba(220,60,60,0.12),rgba(220,60,60,0.04));border-color:rgba(220,80,80,0.6);}
+.tico{font-size:26px;display:block;line-height:1;margin-bottom:5px;}
+.tname{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t1);display:block;}
+.tsub{font-size:9px;color:var(--t2);margin-top:2px;display:block;}
+
+/* DIAGRAM */
+.diag{margin-top:10px;height:56px;border-radius:7px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);overflow:hidden;}
+.diag svg{width:100%;height:100%;}
+
+/* INTENSITY */
+.irow{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.ilbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t2);flex-shrink:0;}
+input[type=range]{-webkit-appearance:none;flex:1;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--em) 0%,var(--em) var(--v,80%),rgba(255,255,255,0.08) var(--v,80%));outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid #1a1e28;box-shadow:0 0 7px rgba(201,168,76,0.4);cursor:pointer;}
+
+/* BENEFITS */
+.bbox{margin-top:10px;padding:10px;border-radius:7px;background:rgba(46,204,113,0.05);border:1px solid rgba(46,204,113,0.13);font-size:11px;line-height:1.65;color:var(--t2);min-height:68px;}
+.bbox strong{display:block;color:var(--em);font-weight:600;font-size:10px;letter-spacing:.5px;margin-bottom:3px;}
+
+/* SCROLL HINT */
+.shint{display:none;}
+@media(min-width:901px){.shint{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;font-size:9px;letter-spacing:2px;color:rgba(201,168,76,0.45);text-transform:uppercase;animation:bounce 2s ease-in-out infinite;}}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(3px);opacity:1;}}
+
+/* CTA */
+.cta-sec{max-width:1400px;margin:0 auto;padding:0 20px 56px;}
+.cta-wrap{background:linear-gradient(135deg,#0e1219,#131820,#0c1016);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;padding:44px 44px 0;}
+.cta-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(46,204,113,0.05),transparent 60%);}
+.cta-wrap::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--em),var(--gold),var(--em),transparent);}
+.cta-ttl{text-align:center;margin-bottom:32px;}
+.cta-eye{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--em);font-weight:500;}
+.cta-h{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,46px);font-weight:700;background:linear-gradient(135deg,#f0ebe0,var(--goldl),#f0ebe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:5px;}
+.cta-grid{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:22px;align-items:start;position:relative;}
+.iblk .ilabel{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;font-weight:600;}
+.iblk .ival{font-size:12px;color:var(--t1);line-height:1.65;}
+.iblk .ival a{color:var(--em);text-decoration:none;}
+.wa-row{display:flex;align-items:center;gap:6px;}
+.wa-ic{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+
+/* MAP BUTTON */
+.map-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:120px;border-radius:10px;border:1px solid var(--border);background:linear-gradient(135deg,#0e1420,#131c30);cursor:pointer;transition:all .3s;text-decoration:none;position:relative;overflow:hidden;}
+.map-btn::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(46,204,113,0.07),transparent 60%);}
+.map-btn:hover{border-color:var(--em);transform:translateY(-2px);box-shadow:0 8px 28px rgba(46,204,113,0.12);}
+.map-btn:hover .map-pin{filter:drop-shadow(0 0 8px var(--em));}
+.map-pin{font-size:32px;transition:filter .3s;}
+.map-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--t2);}
+.map-sub{font-size:9px;color:rgba(46,204,113,0.6);letter-spacing:1px;}
+
+/* FOOTER BAR */
+.fbar{border-top:1px solid var(--border);padding:22px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:32px;}
+.fbrand{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px;letter-spacing:3px;background:linear-gradient(90deg,var(--goldl),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase;}
+.fcopy{font-size:9px;color:var(--t2);letter-spacing:1px;text-align:center;}
+.fdesign{font-size:8px;color:rgba(155,165,180,0.38);letter-spacing:2px;font-style:italic;margin-top:3px;text-align:center;}
+.cta-btns{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.btn-p{padding:12px 24px;border-radius:7px;background:linear-gradient(135deg,var(--em2),#1e8449);border:1px solid var(--em);color:#fff;font-family:'Jost',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(46,204,113,0.2);white-space:nowrap;}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(46,204,113,0.3);}
+.btn-s{padding:10px 20px;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--t2);font-family:'Jost',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ANIMS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.hdr{animation:fadeUp .7s ease both;}
+.sim-hdr{animation:fadeUp .7s .1s ease both;}
+.wrap{animation:fadeUp .7s .2s ease both;}
+.cta-sec{animation:fadeUp .7s .3s ease both;}
+
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;}
+  .cta-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .cta-wrap{padding:26px 18px 0;}
+  .cta-grid{grid-template-columns:1fr;}
+  .fbar{padding:18px 18px;flex-direction:column;align-items:center;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-in">
+    <span class="eyebrow">Precision Vision · Kathmandu</span>
+    <div class="logo-row">
+      <div class="logo-ico">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="16" cy="30" rx="11" ry="9" stroke="#c9a84c" stroke-width="2.2" fill="none"/>
+          <ellipse cx="40" cy="30" rx="11" ry="9" stroke="#c9a84c" stroke-width="2.2" fill="none"/>
+          <line x1="27" y1="30" x2="29" y2="30" stroke="#2ecc71" stroke-width="2.5"/>
+          <line x1="5" y1="30" x2="3" y2="26" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="51" y1="30" x2="53" y2="26" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+          <ellipse cx="12" cy="27" rx="3" ry="2" fill="rgba(46,204,113,0.2)"/>
+          <ellipse cx="36" cy="27" rx="3" ry="2" fill="rgba(46,204,113,0.2)"/>
+          <circle cx="28" cy="13" r="3" fill="none" stroke="#2ecc71" stroke-width="1.5" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="brand">Shreekunja Optical</div>
+    </div>
+    <div class="tagline">Your Vision. Our Expertise. Perfected.</div>
+    <div class="hdr-rule"></div>
+  </div>
+</header>
+
+<!-- SIM HEADER -->
+<div class="sim-hdr">
+  <h2>Interactive <span>Lens Selection</span> Simulator</h2>
+  <p>Drag the centre slider · Switch lens modes · See the difference instantly</p>
+</div>
+
+<!-- MAIN WRAP -->
+<div class="wrap">
+
+  <!-- COMPARISON VIEWER -->
+  <div>
+    <div class="comp-outer">
+      <div class="comp-box" id="compBox">
+        <canvas id="cvPremium"></canvas>
+        <canvas id="cvStandard"></canvas>
+        <div class="plbl plbl-l" id="lblL">Standard Lens</div>
+        <div class="plbl plbl-r" id="lblR">Premium Lens</div>
+        <div class="slider-line" id="sLine"></div>
+        <div class="slider-btn" id="sBtn">◀▶</div>
+      </div>
+      <div class="comp-meta">
+        <span id="modeBadge">Blue-Cut Mode</span>
+        <span style="color:var(--t2);">Drag slider to compare</span>
+        <span>Shreekunja</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Mode Tabs -->
+    <div class="card">
+      <div class="ctitle">Comparison Mode</div>
+      <div class="mtabs">
+        <button class="mtab on" data-m="bluecut">Blue Cut</button>
+        <button class="mtab" data-m="antiglare">Anti-Glare</button>
+        <button class="mtab" data-m="polarized">Polarized</button>
+        <button class="mtab" data-m="progressive">Progressive</button>
+        <button class="mtab" data-m="transition">Transition</button>
+        <button class="mtab" data-m="photochromic">Photochromic</button>
+      </div>
+    </div>
+
+    <!-- Toggles + Diagram -->
+    <div class="card">
+      <div class="ctitle" id="tcTitle">Lens Comparison</div>
+      <div class="tpair">
+        <div class="ltog bad on" id="togL" onclick="pickSide('left')">
+          <span class="tico" id="icoL">😣</span>
+          <span class="tname" id="nmL">Normal Lens</span>
+          <span class="tsub" id="sbL">Standard coating</span>
+        </div>
+        <div class="ltog" id="togR" onclick="pickSide('right')">
+          <span class="tico" id="icoR">🛡️</span>
+          <span class="tname" id="nmR">BlueGuard™</span>
+          <span class="tsub" id="sbR">Blue-light shield</span>
+        </div>
+      </div>
+      <div class="diag">
+        <svg id="diagSvg" viewBox="0 0 260 56" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="rg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#4a9eff"/>
+              <stop offset="100%" stop-color="#ff4a9e"/>
+            </linearGradient>
+          </defs>
+          <text x="4" y="11" font-size="7" fill="#9aa0b0" font-family="Jost,sans-serif">SOURCE</text>
+          <text x="176" y="11" font-size="7" fill="#9aa0b0" font-family="Jost,sans-serif">LENS</text>
+          <text x="232" y="11" font-size="7" fill="#9aa0b0" font-family="Jost,sans-serif">EYE</text>
+          <line x1="10" y1="20" x2="175" y2="20" stroke="url(#rg)" stroke-width="2" opacity="0.9"/>
+          <line x1="10" y1="30" x2="175" y2="30" stroke="url(#rg)" stroke-width="2" opacity="0.7"/>
+          <line x1="10" y1="40" x2="175" y2="40" stroke="url(#rg)" stroke-width="2" opacity="0.5"/>
+          <rect id="dLens" x="176" y="13" width="6" height="30" rx="3" fill="rgba(46,204,113,0.7)"/>
+          <g id="dPass">
+            <line x1="182" y1="20" x2="238" y2="20" stroke="url(#rg)" stroke-width="2" opacity="0.9"/>
+            <line x1="182" y1="30" x2="238" y2="30" stroke="url(#rg)" stroke-width="2" opacity="0.7"/>
+            <line x1="182" y1="40" x2="238" y2="40" stroke="url(#rg)" stroke-width="2" opacity="0.5"/>
+          </g>
+          <circle cx="242" cy="30" r="10" fill="none" stroke="#9aa0b0" stroke-width="1.5"/>
+          <circle cx="242" cy="30" r="5" fill="rgba(46,204,113,0.4)"/>
+        </svg>
+      </div>
+      <div class="irow">
+        <span class="ilbl">Effect</span>
+        <input type="range" id="intSlider" min="0" max="100" value="80" oninput="setIntensity(this.value)">
+        <span class="ilbl" id="intVal">80%</span>
+      </div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="card">
+      <div class="ctitle">Lens Benefits</div>
+      <div class="bbox" id="bBox">
+        <strong>Shreekunja BlueGuard™</strong>
+        Blocks harmful blue-violet light (400–455 nm). Reduces digital eye strain and headaches. Supports better sleep by preserving melatonin. Virtually clear — no colour distortion.
+      </div>
+    </div>
+
+    <div class="shint">▼ &nbsp;Scroll for more&nbsp; ▼</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-sec">
+  <div class="cta-wrap">
+    <div class="cta-ttl">
+      <div class="cta-eye">Experience the Difference</div>
+      <div class="cta-h">Visit Shreekunja Optical Today!</div>
+    </div>
+    <div class="cta-grid">
+      <div class="iblk">
+        <div class="ilabel">📍 Address</div>
+        <div class="ival">
+          M9C3+JJ6, Kathmandu 44600<br>
+          Located inside<br>
+          BP Eye Hospital (ENT &amp; Rehab)
+        </div>
+      </div>
+      <div class="iblk">
+        <div class="ilabel">📞 Contact</div>
+        <div class="ival">
+          <div class="wa-row">
+            <div class="wa-ic" style="background:#25d366;">💬</div>
+            <a href="https://wa.me/9841623999" target="_blank">984-1623999</a>
+          </div>
+          <br>
+          <div class="wa-row" style="margin-top:-8px;">
+            <div class="wa-ic" style="background:#25d366;font-size:10px;">📱</div>
+            <span style="color:var(--t2);font-size:11px;">WhatsApp available</span>
+          </div>
+        </div>
+      </div>
+      <div class="iblk">
+        <div class="ilabel">🕐 Store Hours</div>
+        <div class="ival">
+          Mon – Fri: 08:00 AM – 6:00 PM<br>
+          Saturday: 08:00 AM – 5:00 PM<br>
+          <span style="color:var(--gold);font-size:10px;">● Opens 08:00 Fri</span>
+        </div>
+      </div>
+      <!-- MAP BUTTON -->
+      <div class="iblk">
+        <div class="ilabel">🗺️ Find Us</div>
+        <a class="map-btn" href="https://maps.app.goo.gl/h5bhpfajS9Mp6WMd9" target="_blank" rel="noopener">
+          <span class="map-pin">📍</span>
+          <span class="map-lbl">Open in Google Maps</span>
+          <span class="map-sub">Tap to navigate ↗</span>
+        </a>
+      </div>
+    </div>
+    <div class="fbar">
+      <div class="fbrand">Shreekunja Optical</div>
+      <div>
+        <div class="fcopy">© 2025 Shreekunja Optical · All Rights Reserved</div>
+        <div class="fdesign">Web Designed by Mr. Dipesh</div>
+      </div>
+      <div class="cta-btns">
+        <button class="btn-p" onclick="window.open('https://wa.me/9841623999','_blank')">📅 Book an Eye Test</button>
+        <button class="btn-s" onclick="window.open('tel:9841623999')">📞 Call 984-1623999</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let mode = 'bluecut';
+let sliderPct = 50;   // 0–100, left = standard side width
+let intensity = 0.8;
+let dragging = false;
+
+// ═══════════════════════════════════════════
+//  MODE DEFINITIONS
+// ═══════════════════════════════════════════
+const MODES = {
+  bluecut:{
+    badge:'Blue-Cut Mode', scene:'office',
+    lblL:'Standard Lens', lblR:'BlueGuard™ Premium',
+    icoL:'😣', nmL:'Normal Lens', sbL:'Unfiltered blue light',
+    icoR:'🛡️', nmR:'BlueGuard™',  sbR:'Blue-light shield',
+    ctitle:'Blue-Cut Comparison',
+    benefit:'<strong>Shreekunja BlueGuard™</strong>Blocks harmful blue-violet light (400–455 nm). Reduces digital eye strain and headaches. Supports better sleep by preserving melatonin. Virtually clear — no colour distortion.'
+  },
+  antiglare:{
+    badge:'Anti-Glare (AR) Mode', scene:'night',
+    lblL:'Uncoated Lens', lblR:'AR Coated Lens',
+    icoL:'🌟', nmL:'Uncoated',    sbL:'Reflective surface',
+    icoR:'👁️', nmR:'AR Premium',  sbR:'Zero reflections',
+    ctitle:'Anti-Glare Comparison',
+    benefit:'<strong>AR Premium Coating</strong>Eliminates lens reflections & ghosting. Enhances night driving — neutralises headlight starburst. Crystal-clear eye contact. Reduces glare from screens and overhead lights.'
+  },
+  polarized:{
+    badge:'Polarized Mode', scene:'road',
+    lblL:'Non-Polarized', lblR:'Polarized Lens',
+    icoL:'☀️', nmL:'Non-Polarized', sbL:'Full surface glare',
+    icoR:'🕶️', nmR:'Polarized',    sbR:'Glare eliminated',
+    ctitle:'Polarized Comparison',
+    benefit:'<strong>Polarized Lenses</strong>Eliminates horizontal glare from roads & water. Enhances colour and contrast. Reduces eye fatigue on bright days. Essential for driving, fishing and outdoor sports.'
+  },
+  progressive:{
+    badge:'Progressive Multifocal', scene:'text',
+    lblL:'Single Vision', lblR:'Progressive Lens',
+    icoL:'🔍', nmL:'Single Vision', sbL:'One focal zone',
+    icoR:'✨', nmR:'Progressive',   sbR:'Three focal zones',
+    ctitle:'Progressive Comparison',
+    benefit:'<strong>Progressive Lenses</strong>Seamless near, intermediate & far vision. No visible lines — cosmetically elegant. Eliminates need for multiple pairs. Ideal for presbyopia from age 40+.'
+  },
+  transition:{
+    badge:'Transition Lens Mode', scene:'sun',
+    lblL:'Regular Lens', lblR:'Transition Lens',
+    icoL:'💡', nmL:'Clear Indoors', sbL:'No UV protection',
+    icoR:'🌤️', nmR:'Auto-Tinting',  sbR:'UV-activated tint',
+    ctitle:'Transition Comparison',
+    benefit:'<strong>Transition Lenses</strong>Automatically darkens outdoors, lightens indoors. Blocks 100% UVA and UVB rays. Reduces fatigue from brightness changes. One lens for every lighting condition.'
+  },
+  photochromic:{
+    badge:'Photochromic Mode', scene:'sun',
+    lblL:'Clear Lens', lblR:'PhotoChrom™',
+    icoL:'🔆', nmL:'No Tint',      sbL:'UV unprotected',
+    icoR:'🌈', nmR:'PhotoChrom™',  sbR:'Smart UV response',
+    ctitle:'Photochromic Comparison',
+    benefit:'<strong>PhotoChrom™ Technology</strong>Advanced molecular photochromic dye. Faster activation & fade than standard transitions. Available in multiple tint colours. Superior UV and blue-light dual protection.'
+  }
+};
+
+// ═══════════════════════════════════════════
+//  CANVAS SETUP
+// ═══════════════════════════════════════════
+const box   = document.getElementById('compBox');
+const cvP   = document.getElementById('cvPremium');
+const cvS   = document.getElementById('cvStandard');
+const ctxP  = cvP.getContext('2d');
+const ctxS  = cvS.getContext('2d');
+const sLine = document.getElementById('sLine');
+const sBtn  = document.getElementById('sBtn');
+
+function resize() {
+  const W = box.clientWidth, H = box.clientHeight;
+  cvP.width = cvS.width = W;
+  cvP.height = cvS.height = H;
+  redraw();
+}
+
+function redraw() {
+  const W = cvP.width, H = cvP.height;
+  const sc = MODES[mode].scene;
+  // Premium (right side) — always full frame, clip applied via CSS
+  drawScene(ctxP, W, H, sc, true);
+  // Standard (left side)
+  drawScene(ctxS, W, H, sc, false);
+  // Clip standard to left portion
+  cvS.style.clipPath = `inset(0 ${100 - sliderPct}% 0 0)`;
+  // Move slider elements
+  sLine.style.left = sliderPct + '%';
+  sBtn.style.left  = sliderPct + '%';
+}
+
+// ═══════════════════════════════════════════
+//  SCENE DRAWING
+// ═══════════════════════════════════════════
+function rng(seed, i) {
+  // deterministic pseudo-random so scene is stable
+  return ((Math.sin(seed * 127.1 + i * 311.7) * 43758.5453) % 1 + 1) % 1;
+}
+
+function drawScene(ctx, W, H, scene, isPrem) {
+  ctx.clearRect(0, 0, W, H);
+  if (scene === 'night')  drawNight(ctx, W, H, isPrem);
+  else if (scene === 'road')   drawRoad(ctx, W, H, isPrem);
+  else if (scene === 'office') drawOffice(ctx, W, H, isPrem);
+  else if (scene === 'text')   drawText(ctx, W, H, isPrem);
+  else                         drawSun(ctx, W, H, isPrem);
+}
+
+/* --- NIGHT SCENE --- */
+function drawNight(ctx, W, H, isPrem) {
+  // Sky
+  const sky = ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0, isPrem ? '#060a14' : '#090d18');
+  sky.addColorStop(1, isPrem ? '#0d1525' : '#0a1020');
+  ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+
+  // Road
+  ctx.fillStyle = isPrem ? '#111520' : '#0d1118';
+  ctx.fillRect(0, H*0.58, W, H*0.42);
+  // Road line
+  ctx.save(); ctx.setLineDash([20,14]);
+  ctx.strokeStyle = isPrem ? 'rgba(255,255,180,0.55)' : 'rgba(255,255,180,0.22)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2, H*0.58); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.restore();
+
+  // Buildings
+  const blds = [[0,0.62,0.12,0.38],[0.1,0.44,0.13,0.56],[0.21,0.54,0.1,0.46],
+                [0.3,0.38,0.15,0.62],[0.43,0.48,0.12,0.52],[0.54,0.42,0.11,0.58],
+                [0.63,0.54,0.14,0.46],[0.75,0.4,0.17,0.6],[0.9,0.58,0.12,0.42]];
+  blds.forEach(([bx,by,bw,bh],bi)=>{
+    ctx.fillStyle = `hsl(220,18%,${isPrem?11:8}%)`;
+    ctx.fillRect(W*bx, H*by, W*bw, H*bh);
+    for(let wy=H*(by+0.03); wy<H*(by+bh)-6; wy+=11){
+      for(let wx=W*bx+5; wx<W*(bx+bw)-5; wx+=10){
+        if(rng(bi, wx+wy)>0.42){
+          const a = isPrem ? 0.35+rng(bi,wx)*0.5 : 0.1+rng(bi,wx)*0.18;
+          ctx.fillStyle = `rgba(255,230,100,${a})`;
+          ctx.fillRect(wx, wy, 5, 4);
+        }
+      }
+    }
+  });
+
+  // Neon signs
+  [['HOTEL',0.12,0.28,'#ff4444'],['BAR',0.46,0.3,'#44ffaa'],['24/7',0.66,0.26,'#4488ff']].forEach(([txt,sx,sy,col])=>{
+    ctx.font = `bold ${W*0.032}px Jost,sans-serif`;
+    ctx.shadowColor = col; ctx.shadowBlur = isPrem ? 10 : 3;
+    ctx.fillStyle = isPrem ? col : col+'88';
+    ctx.fillText(txt, W*sx, H*sy);
+    ctx.shadowBlur = 0;
+  });
+
+  // Headlights with starburst for standard
+  [[0.28,0.7],[0.34,0.7],[0.6,0.68],[0.66,0.68]].forEach(([lx,ly])=>{
+    const r = isPrem ? W*0.07 : W*0.22;
+    const lg = ctx.createRadialGradient(W*lx,H*ly,0,W*lx,H*ly,r);
+    lg.addColorStop(0, 'rgba(255,255,220,0.98)');
+    lg.addColorStop(isPrem?0.25:0.12, isPrem?'rgba(255,255,180,0.35)':'rgba(255,255,200,0.8)');
+    lg.addColorStop(1,'rgba(255,255,160,0)');
+    ctx.fillStyle = lg; ctx.fillRect(0,0,W,H);
+
+    if (!isPrem) {
+      // Starburst
+      ctx.save(); ctx.translate(W*lx, H*ly);
+      for(let a=0; a<8; a++){
+        ctx.rotate(Math.PI/4);
+        const sg = ctx.createLinearGradient(0,0,W*0.2,0);
+        sg.addColorStop(0,'rgba(255,255,180,0.5)');
+        sg.addColorStop(1,'rgba(255,255,180,0)');
+        ctx.fillStyle=sg; ctx.fillRect(0,-2,W*0.2,4);
+      }
+      ctx.restore();
+    }
+  });
+
+  // Overall haze for standard
+  if (!isPrem) {
+    ctx.fillStyle = 'rgba(180,190,255,0.07)';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+/* --- ROAD / POLARIZED --- */
+function drawRoad(ctx, W, H, isPrem) {
+  // Sky
+  const sky = ctx.createLinearGradient(0,0,0,H*0.52);
+  sky.addColorStop(0, isPrem?'#184878':'#3060a0');
+  sky.addColorStop(1, isPrem?'#2868aa':'#5888cc');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.52);
+  // Road
+  ctx.fillStyle = isPrem?'#262a36':'#2c3040';
+  ctx.fillRect(0,H*0.52,W,H*0.48);
+  // Centre line
+  ctx.save(); ctx.setLineDash([22,16]);
+  ctx.strokeStyle = isPrem?'rgba(255,255,200,0.55)':'rgba(255,255,200,0.28)';
+  ctx.lineWidth=2.5; ctx.beginPath();
+  ctx.moveTo(W/2,H*0.52); ctx.lineTo(W/2,H); ctx.stroke(); ctx.restore();
+  // Mountains
+  ctx.fillStyle = isPrem?'rgba(18,38,78,0.8)':'rgba(36,58,98,0.65)';
+  ctx.beginPath(); ctx.moveTo(0,H*0.52);
+  [0,0.14,0.24,0.36,0.5,0.62,0.74,0.87,1].forEach((x,i)=>{
+    ctx.lineTo(W*x, H*(i%2===0?0.36:0.24));
+  });
+  ctx.lineTo(W,H*0.52); ctx.closePath(); ctx.fill();
+
+  if (!isPrem) {
+    // Horizontal glare over road
+    const gl = ctx.createLinearGradient(0,H*0.52,0,H);
+    gl.addColorStop(0,'rgba(160,190,240,0.68)');
+    gl.addColorStop(0.35,'rgba(160,190,240,0.38)');
+    gl.addColorStop(1,'rgba(90,120,180,0.08)');
+    ctx.fillStyle=gl; ctx.fillRect(0,H*0.52,W,H*0.48);
+    // streaks
+    for(let i=0;i<10;i++){
+      const sg=ctx.createLinearGradient(W*(i/10),H*0.54,W*(i/10+0.14),H*0.72);
+      sg.addColorStop(0,'rgba(210,225,255,0.38)'); sg.addColorStop(1,'rgba(210,225,255,0)');
+      ctx.fillStyle=sg; ctx.fillRect(W*(i/10),H*0.52,W*0.13,H*0.4);
+    }
+  } else {
+    // Subtle wet road sheen
+    ctx.fillStyle='rgba(35,70,130,0.12)';
+    ctx.fillRect(0,H*0.52,W,H*0.48);
+    for(let i=0;i<14;i++){
+      ctx.fillStyle=`rgba(40,48,62,${0.25+rng(5,i)*0.3})`;
+      ctx.fillRect(rng(5,i*2)*W, H*0.52+rng(5,i*3)*H*0.48, W*0.06, 2);
+    }
+  }
+}
+
+/* --- OFFICE / BLUE-CUT --- */
+function drawOffice(ctx, W, H, isPrem) {
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0, isPrem?'#0f1520':'#0c1218');
+  bg.addColorStop(1, isPrem?'#141e2e':'#101820');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Desk
+  ctx.fillStyle = isPrem?'#1a1e2a':'#131720';
+  ctx.fillRect(0,H*0.62,W,H*0.38);
+
+  // Monitor frame
+  const mx=W*0.28, my=H*0.08, mw=W*0.44, mh=H*0.52;
+  ctx.fillStyle='#1a1e28'; ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=2;
+  ctx.fillRect(mx,my,mw,mh); ctx.strokeRect(mx,my,mw,mh);
+  // Screen
+  const sc=ctx.createLinearGradient(mx,my,mx+mw,my+mh);
+  sc.addColorStop(0, isPrem?'#081e4a':'#152050');
+  sc.addColorStop(1, isPrem?'#091428':'#0e1838');
+  ctx.fillStyle=sc; ctx.fillRect(mx+2,my+2,mw-4,mh-4);
+  // Text lines on screen
+  for(let i=0;i<9;i++){
+    const la = isPrem ? 0.5+rng(3,i)*0.4 : 0.12+rng(3,i)*0.15;
+    ctx.fillStyle=`rgba(100,180,255,${la})`;
+    ctx.fillRect(mx+12, my+14+i*20, (mw-24)*(0.38+rng(3,i+9)*0.5), 6);
+  }
+  // Screen glow (blue for standard = harsh, warm for premium)
+  const gl=ctx.createRadialGradient(mx+mw/2,my+mh/2,0,mx+mw/2,my+mh/2,mw*0.85);
+  gl.addColorStop(0, isPrem?'rgba(40,80,220,0.1)':'rgba(50,100,255,0.42)');
+  gl.addColorStop(1,'rgba(50,100,255,0)');
+  ctx.fillStyle=gl; ctx.fillRect(0,0,W,H);
+
+  if (!isPrem) {
+    // Blue haze
+    ctx.fillStyle='rgba(80,120,255,0.1)'; ctx.fillRect(0,0,W,H);
+    // Lens reflection ghost
+    ctx.fillStyle='rgba(140,170,255,0.06)'; ctx.fillRect(0,0,W,H);
+  } else {
+    // Warm tint overlay (BlueGuard)
+    ctx.fillStyle=`rgba(255,220,160,${intensity*0.07})`; ctx.fillRect(0,0,W,H);
+  }
+  // Keyboard
+  ctx.fillStyle = isPrem?'rgba(80,90,110,0.55)':'rgba(60,70,90,0.38)';
+  ctx.fillRect(W*0.22,H*0.68,W*0.56,H*0.07);
+  for(let i=0;i<44;i++){
+    ctx.fillStyle='rgba(200,200,220,0.14)';
+    ctx.fillRect(W*0.24+i*W*0.011, H*0.69, W*0.009, H*0.048);
+  }
+}
+
+/* --- TEXT / PROGRESSIVE --- */
+function drawText(ctx, W, H, isPrem) {
+  ctx.fillStyle = isPrem?'#ede5d3':'#f2ead8'; ctx.fillRect(0,0,W,H);
+  // Progressive zone bands
+  if (isPrem) {
+    [['DISTANCE',0,0.3,'rgba(46,180,120,0.1)'],
+     ['INTERMEDIATE',0.3,0.18,'rgba(80,140,255,0.1)'],
+     ['NEAR',0.48,0.52,'rgba(255,180,50,0.1)']].forEach(([l,y,h,c])=>{
+      ctx.fillStyle=c; ctx.fillRect(0,H*y,W,H*h);
+      ctx.font=`${W*0.018}px Jost,sans-serif`; ctx.fillStyle='rgba(80,80,80,0.35)';
+      ctx.fillText(l, W*0.78, H*(y+h*0.55));
+    });
+  }
+  const texts = ['Shreekunja Optical — Premium Vision',
+    'Lorem ipsum dolor sit amet consectetur',
+    'adipisicing elit. Sed optical precision',
+    'matters most when your world is clear.',
+    '','Near reading zone — this text',
+    'should be crisp and easy to read.',
+    '— Progressive Lens Technology —'];
+  texts.forEach((t,i)=>{
+    const blur = isPrem ? 0 : Math.max(0,1.5+(i-3)*0.5);
+    ctx.filter = blur>0 ? `blur(${blur}px)` : 'none';
+    ctx.font=`${W*0.024}px serif`;
+    ctx.fillStyle = isPrem?`rgba(20,20,20,${0.85-i*0.02})`:`rgba(20,20,20,${0.3-i*0.01})`;
+    ctx.fillText(t, W*0.07, H*0.1+i*H*0.1);
+    ctx.filter='none';
+  });
+}
+
+/* --- SUN / TRANSITION --- */
+function drawSun(ctx, W, H, isPrem) {
+  const sky=ctx.createLinearGradient(0,0,0,H*0.62);
+  sky.addColorStop(0, isPrem?'#1248808':'#3070bc');
+  sky.addColorStop(0, isPrem?'#184880':'#3070bc');
+  sky.addColorStop(1, isPrem?'#3a8acc':'#5c9ade');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.62);
+  // Ground
+  ctx.fillStyle = isPrem?'#346024':'#427830';
+  ctx.fillRect(0,H*0.62,W,H*0.38);
+  // Sun
+  const sx=W*0.72, sy=H*0.14;
+  const sunR=ctx.createRadialGradient(sx,sy,0,sx,sy,isPrem?W*0.09:W*0.26);
+  sunR.addColorStop(0,'rgba(255,252,200,1)');
+  sunR.addColorStop(0.3, isPrem?'rgba(255,220,50,0.55)':'rgba(255,255,255,0.82)');
+  sunR.addColorStop(1,'rgba(255,200,50,0)');
+  ctx.fillStyle=sunR; ctx.fillRect(0,0,W,H*0.62);
+  // Auto-tint for premium
+  if (isPrem) {
+    ctx.fillStyle=`rgba(70,50,0,${intensity*0.28})`; ctx.fillRect(0,0,W,H);
+    const tv=ctx.createRadialGradient(W/2,H/2,H*0.1,W/2,H/2,H*0.72);
+    tv.addColorStop(0,'rgba(50,30,0,0.04)');
+    tv.addColorStop(1,`rgba(30,15,0,${intensity*0.18})`);
+    ctx.fillStyle=tv; ctx.fillRect(0,0,W,H);
+  }
+  // Trees silhouette
+  for(let i=0;i<9;i++){
+    const tx=W*(0.05+i*0.11), ty=H*(0.48+rng(7,i)*0.1);
+    ctx.fillStyle = isPrem?'rgba(16,32,14,0.9)':'rgba(26,48,22,0.7)';
+    ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(tx-W*0.03,H*0.62); ctx.lineTo(tx+W*0.03,H*0.62); ctx.closePath(); ctx.fill();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SLIDER DRAG
+// ═══════════════════════════════════════════
+function getPct(e) {
+  const r = box.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  return Math.max(3, Math.min(97, (cx - r.left) / r.width * 100));
+}
+
+box.addEventListener('mousedown',  e=>{ dragging=true; sliderPct=getPct(e); redraw(); });
+window.addEventListener('mousemove', e=>{ if(dragging){ sliderPct=getPct(e); redraw(); } });
+window.addEventListener('mouseup',   ()=>{ dragging=false; });
+box.addEventListener('touchstart',  e=>{ dragging=true; sliderPct=getPct(e); redraw(); },{passive:true});
+window.addEventListener('touchmove', e=>{ if(dragging){ sliderPct=getPct(e); redraw(); } },{passive:true});
+window.addEventListener('touchend',  ()=>{ dragging=false; });
+
+// ═══════════════════════════════════════════
+//  MODE SWITCHING
+// ═══════════════════════════════════════════
+document.querySelectorAll('.mtab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    mode = btn.dataset.m;
+    applyMode();
+    redraw();
+  });
+});
+
+function applyMode() {
+  const m = MODES[mode];
+  document.getElementById('modeBadge').textContent = m.badge;
+  document.getElementById('lblL').textContent = m.lblL;
+  document.getElementById('lblR').textContent = m.lblR;
+  document.getElementById('icoL').textContent = m.icoL;
+  document.getElementById('nmL').textContent  = m.nmL;
+  document.getElementById('sbL').textContent  = m.sbL;
+  document.getElementById('icoR').textContent = m.icoR;
+  document.getElementById('nmR').textContent  = m.nmR;
+  document.getElementById('sbR').textContent  = m.sbR;
+  document.getElementById('tcTitle').textContent = m.ctitle;
+  document.getElementById('bBox').innerHTML   = m.benefit;
+  pickSide('left', false);
+}
+
+// ═══════════════════════════════════════════
+//  TOGGLE LEFT / RIGHT
+// ═══════════════════════════════════════════
+function pickSide(side, animate=true) {
+  const tl=document.getElementById('togL'), tr=document.getElementById('togR');
+  if(side==='left'){
+    tl.classList.add('on','bad'); tr.classList.remove('on');
+  } else {
+    tr.classList.add('on'); tl.classList.remove('on','bad');
+    if(animate){ animSlider(sliderPct, 5); }
+  }
+}
+
+function animSlider(from, to) {
+  let cur = from;
+  const step = from>to ? -2 : 2;
+  const id = setInterval(()=>{
+    cur += step;
+    sliderPct = cur;
+    redraw();
+    if((step<0 && cur<=to)||(step>0 && cur>=to)){ clearInterval(id); sliderPct=to; redraw(); }
+  },16);
+}
+
+// ═══════════════════════════════════════════
+//  INTENSITY SLIDER
+// ═══════════════════════════════════════════
+function setIntensity(v){
+  intensity = v/100;
+  document.getElementById('intVal').textContent = v+'%';
+  document.getElementById('intSlider').style.setProperty('--v', v+'%');
+  redraw();
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.addEventListener('resize', resize);
+// Use ResizeObserver for reliable canvas sizing
+const ro = new ResizeObserver(resize);
+ro.observe(box);
+resize();
+
+// Intro animation
+setTimeout(()=>animSlider(80,50), 700);
+</script>
+</body>
+</html>
